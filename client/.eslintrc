@@ -16,13 +16,15 @@
     "__PROD__"     : false,
     "__DEBUG__"    : false,
     "__DEBUG_NEW_WINDOW__" : false,
-    "__BASENAME__" : false
+    "__BASENAME__" : false,
+    "HERA_HOST": false
   },
   "rules": {
     "semi" : [2, "always"],
     "indent": [1, 4, {"SwitchCase": 1}],
     "max-len": [2, 120, 2],
     "react/jsx-indent": 0,
-    space-before-function-paren: ["error", { "anonymous": "always", "named": "ignore" }]
+    "padded-blocks": 0,
+    "space-before-function-paren": ["error", { "anonymous": "always", "named": "ignore" }]
   }
 }

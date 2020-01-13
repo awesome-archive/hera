@@ -1,8 +1,8 @@
-#Hera
+# Hera
 
 Train/evaluate a Keras model, get metrics streamed to a dashboard in your browser.
 
-![demo](https://cloud.githubusercontent.com/assets/5866348/16719660/13460bee-46e2-11e6-8ab1-56873807390d.gif)
+![demo](https://j.gifs.com/3lO37p.gif)
 
 ## Setting up
 
@@ -16,33 +16,18 @@ Train/evaluate a Keras model, get metrics streamed to a dashboard in your browse
 
 ```
 
-**Initialize the spy**
+**Add the callback**
 
 ```python
 
-    from heraspy.model import HeraModel
-
-    hera_model = HeraModel(
-        {
-            'id': 'my-model' # any ID you want to use to identify your model
-        },
-        {
-            # location of the local hera server, out of the box it's the following
-            'domain': 'localhost',
-            'port': 4000
-        }
+    herasCallback = HeraCallback(
+        'model-key',
+        'localhost',
+        4000
     )
 
-```
+    model.fit(X_train, Y_train, callbacks=[herasCallback])
 
-**Plant the spy**
-
-A spy admits a Keras callback that you can attach to your experiment. For example
-```
-    model.fit(
-        X_train, Y_train,
-        callbacks=[hera_model.callback]
-    )
 ```
 
 ### Step 2. Start the server
@@ -53,6 +38,7 @@ Git clone this repository, then run
 
     cd server
     npm install
+    gulp # optional, for now the build file is kept track in git
     node build/server
 ```
 
@@ -66,6 +52,51 @@ Git clone this repository, then run
     npm start
 ```
 
+
+## Using RabbitMQ
+
+
+By default hera uses socket.io for messaging - both from keras callback to server, and from server to dashboard. This is to minimize the number of things one needs to install before getting up and running with hera.
+
+However, in production socket.io is outperformed by a number of alternatives, also it is good in general to decouple the server-client communication from the inter-process communitation (python -> node) so that each can be managed and optimized independently.
+
+To demonstrate how this works Hera ships with the option to use rabbitMQ for interprocess communication. Here's how to use it.
+
+**In your model file**
+
+```python
+
+    from heraspy.callback import HeraCallback
+    from heraspy.dispatchers.rabbitmq import get_rabbitmq_dispatcher
+
+    herasCallback = HeraCallback(
+        'model-key', 'localhost', 4000,
+        dispatch=get_rabbitmq_dispatcher(
+          queue='[my-queue]',
+          amqps_url='amqps://[user]:[pass]@my-amqp-address'
+        )
+    )
+
+```
+
+
+**In server/src/server.js**
+
+Replace the only line in the file with
+```js
+
+    getServer({
+        dispatcher: 'rabbitmq',
+        dispatcherConfig: {
+            amqpUrl: 'amqps://[user]:[pass]@my-amqp-address',
+            amqpQueue: '[my-queue]'
+        }
+    }).start();
+
+
+```
+
+That's it! Now communication from the python process and the node webserver process goes through rabbitmq.
 
 ## Credits
 

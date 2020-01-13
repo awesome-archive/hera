@@ -1,10 +1,10 @@
 import CoreLayout from '../layouts/CoreLayout/CoreLayout';
-import ViewRoute from './DataView';
+import Home from './home';
 
 export const createRoutes = (store) => ({
     path: '/',
     component: CoreLayout,
-    indexRoute: ViewRoute(store),
+    indexRoute: Home,
     childRoutes: []
 });
 
